@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script>
+      var url =
+        "https://images.unsplash.com/photo-1664575601711-67110e027b9b?crop=entropy\u0026cs=tinysrgb\u0026fit=max\u0026fm=jpg\u0026ixid=MnwzNzgyNTh8MXwxfGFsbHwxfHx8fHx8Mnx8MTY2NzcwODQzNg\u0026ixlib=rb-4.0.3\u0026q=80\u0026w=1080";
+      var img = document.getElementById("wallpaper");
+      img.src = url;
+    </script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+      }
+      .imgbox {
+        display: grid;
+        height: 100%;
+      }
+      .center-fit {
+        max-width: 100%;
+        max-height: 100vh;
+        margin: auto;
+        background-size: cover;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="imgbox">
+      <img
+        id="wallpaper"
+        class="center-fit"
+        src="https://images.unsplash.com/photo-1667558504817-f486c189f2b1?crop=entropy\u0026cs=tinysrgb\u0026fit=max\u0026fm=jpg\u0026ixid=MnwzNzgyNTh8MHwxfGFsbHwyfHx8fHx8Mnx8MTY2NzcwODQzNg\u0026ixlib=rb-4.0.3\u0026q=80\u0026w=1080"
+        alt="Motivational Wallpaper"
+      />
+    </div>
+  </body>
+</html>
