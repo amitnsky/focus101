@@ -1,4 +1,7 @@
 <html>
+  <head>
+    <script src="./home.js" type="module"></script>
+  </head>
   <body>
     <div style="width: 200px">
       <h1>Focus 101</h1>
@@ -7,17 +10,17 @@
           type="radio"
           id="whitelist_mode"
           name="filtering_mode"
-          value="Enable Whitelist Mode"
+          value="Whitelist Mode"
         />
-        <label for="whitelist_mode">Enable Whitelist Mode</label><br />
+        <label for="whitelist_mode">Whitelist Mode</label><br />
 
         <input
           type="radio"
           id="blacklist_mode"
           name="filtering_mode"
-          value="Enable Blacklist Mode"
+          value="Blacklist Mode"
         />
-        <label for="blacklist_mode">Enable Blacklist Mode</label><br />
+        <label for="blacklist_mode">Blacklist Mode</label><br />
 
         <input
           type="radio"
@@ -27,13 +30,13 @@
         />
         <label for="disabled_mode">Disable Filtering</label><br /><br />
 
-        <input type="text" id="blocked_url" name="blocked_url" /><br />
-        <label for="blocked_url">Filter Url</label><br />
-
-        <ul>
-          <li></li>
-        </ul>
+        <input type="text" id="blocked_url_text" name="blocked_url" /><br /><br />
+        <button id="blocked_url_submit">Submit</button><br />
       </form>
+      <div>Filtered Urls</div>
+      <ul id="filtered_urls_ul">
+        
+      </ul>
     </div>
   </body>
 </html>

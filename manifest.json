@@ -6,11 +6,11 @@
   "action": {
     "default_icon": "images/focus_icon.png"
   },
-  "options_page": "options.html",
+  "options_page": "./home/home.html",
   "background": {
     "service_worker": "worker.js",
     "type": "module"
   },
-  "permissions": ["tabs", "contextMenus", "declarativeNetRequest"],
+  "permissions": ["tabs", "contextMenus", "declarativeNetRequest",  "activeTab","scripting","storage"],
   "host_permissions": ["<all_urls>"]
 }
