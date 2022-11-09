@@ -1,34 +1,20 @@
-TODOs:
-<!-- hello world extension -->
-  <!-- console.alert(hello) -->
-<!-- console.log(url of page) -->
-<!-- console.log(url of blocked page) -->
-<!-- create a simple popup to show when site is blocked: "This site is blocked!" -->
-<!-- add option to add new site in block list from popup -->
-<!-- add context menu to switch between Black list mode and white list mode  -->
-<!-- redirect to options.html when blocked -->
+Minimum required features for launch
+- enable disable extension
+- ability to block url
+- live refresh options page
+- ability to remove a blocked url
+- persist blocked urls
+- Good icon for extension
 
-x it just works
-x you can simply block or unblock a url
+TODOs
+- persist on/off data in storage
+- add a save button for enable/disable in option page
+- 
 
-- update flows
-  - mode = ENABLED/DISABLED
-  - move text edit boxes to separate sections
-    - Block Urls
-    - Exception Urls
-  - two submit buttons - Block/Add Exception
-    - add blocking urls
-    - add exception urls
-  x remove option of blacklist and whitelist urls, only blocking feature support now + exceptions
-  - save mode data in storage key 'FILTERING_MODE': "ON/OFF"
-  - rename submit button to add url
-  - rename filtered to "Blocked Urls"
-  - update filter url list immediately
-  - add edit option for blocked urls
-  - update icon of extension
-  - publish extension
-LATER
-- add option of scheduling blocking mode
-- find a random free wallpaper site for motivational wallpapers in blocked.html
-- add focus icon 
-- publish this extension for free
+
+Additional features
+- add exception for pages
+- show a nice UI when blocking
+- optionally redirect to a new page (configurable)
+- scheduling
+- do not add duplicate urls

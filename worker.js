@@ -1,8 +1,24 @@
+const EXTENSION_STATUS = "extension_status"
+const FILTER_RULES = "filter_rules"
 const ENABLED = "enabled";
 const DISABLED = "disabled";
+
 const filterRules = [];
 let mode = ENABLED;
 let redirectUrl = "meditopia.com";
+
+const init = async () =>{
+  return new Promise((resolve, reject) => {
+    chrome.storage.sync.get([EXTENSION_STATUS], function(mode_val) {
+      if(!mode_val || !mode_val[EXTENSION_STATUS]){
+        mode = DISABLED;
+      }else{
+        mode = mode_val[EXTENSION_STATUS];
+      }
+      resolve();
+    });
+  });
+}
 
 const setupContextMenus = () => {
   chrome.contextMenus.create({
@@ -22,22 +38,62 @@ const setupContextMenus = () => {
   });
 };
 
-chrome.runtime.onInstalled.addListener(() => {
+chrome.runtime.onInstalled.addListener(async () => {
+  await init()
   setupContextMenus();
+  if(mode === ENABLED)
+    enableExtension()
+  else 
+    disableExtension()
 });
+
+const enableExtension = async () => {
+  mode = ENABLED;
+  await loadRules()
+  chrome.declarativeNetRequest.updateDynamicRules({
+    removeRuleIds: getAllRulesIds(),
+    addRules: getAllRules(),
+  });
+  chrome.storage.sync.set({EXTENSION_STATUS: ENABLED});
+}
+
+const disableExtension = async () => {
+  mode = DISABLED;
+  await persistRules([...filterRules])
+  console.log('persisted data',filterRules)
+  chrome.declarativeNetRequest.updateDynamicRules({
+    removeRuleIds: getAllRulesIds(),
+  });
+  chrome.storage.sync.set({EXTENSION_STATUS: DISABLED});
+  while(filterRules.length>0) filterRules.pop()
+}
+
+const persistRules = async (rules) => {
+  return new Promise((resolve, reject) => {
+    chrome.storage.sync.set({FILTER_RULES: rules}, function(){
+      console.log('saved data:', rules)
+      resolve()
+    })
+  });
+}
+
+const loadRules = async () => {
+  return new Promise((resolve, reject) => {
+    chrome.storage.sync.get(FILTER_RULES, function(response) {
+      if(response && response[FILTER_RULES] && response[FILTER_RULES].length > 0 ){
+        filterRules.push([...response[FILTER_RULES]])
+      }
+      console.log('retrived urls:', response)
+    })
+    resolve()
+  })
+}
 
 chrome.contextMenus.onClicked.addListener((clickData) => {
   if (clickData.menuItemId === ENABLED) {
-    mode = ENABLED;
-    chrome.declarativeNetRequest.updateDynamicRules({
-      removeRuleIds: getAllRulesIds(),
-      addRules: getAllRules(),
-    });
+    enableExtension()
   } else if (clickData.menuItemId === DISABLED) {
-    mode = DISABLED;
-    chrome.declarativeNetRequest.updateDynamicRules({
-      removeRuleIds: getAllRulesIds(),
-    });
+    disableExtension()
   }
 });
 
@@ -57,16 +113,16 @@ const logAllRules = () => {
 
 logAllRules()
 
-const getAllRulesIds = () => filterRules.map((rule) => rule.id)
+const getAllRulesIds = () => [...filterRules.map((rule) => rule.id)]
 
 const getAllRules = () => filterRules
 
 /*
 actions:
+
 BLACKLIST_URL,
-WHITELIST_URL,
+REMOVE_BLACKLISTED_URL,
 GET_BLACKLISTED_URLS,
-GET_WHITELISTED_URLS
 **/
 
 chrome.runtime.onMessage.addListener(
@@ -74,26 +130,29 @@ chrome.runtime.onMessage.addListener(
     if (request.action === "BLACKLIST_URL"){
       addRule(request.url, 'block','')
       sendResponse({status: "success"});
+    }else if (request.action === "REMOVE_BLACKLISTED_URL"){
+      // console.log('received req')
+      // chrome.declarativeNetRequest.getDynamicRules((rules) => {
+      //   console.log('sending response')
+      //   sendResponse({"rules": rules});
+      // });
+      // return true
     }else if (request.action === "GET_BLACKLISTED_URLS"){
-      console.log('received req')
-      chrome.declarativeNetRequest.getDynamicRules((rules) => {
-        console.log('sending response')
-        sendResponse({"rules": rules});
-      });
+      sendResponse({"rules": filterRules});
       return true
     }
   }
 );
 
-const removeAllRules = () => {
-  const enabledRulesIds = [];
-  chrome.declarativeNetRequest.getDynamicRules((rules) => {
-    rules.map((rule) => enabledRulesIds.push(rule.id));
-  });
-  chrome.declarativeNetRequest.updateDynamicRules({
-    removeRuleIds: enabledRulesIds,
-  });
-};
+// const removeAllRules = () => {
+//   const enabledRulesIds = [];
+//   chrome.declarativeNetRequest.getDynamicRules((rules) => {
+//     rules.map((rule) => enabledRulesIds.push(rule.id));
+//   });
+//   chrome.declarativeNetRequest.updateDynamicRules({
+//     removeRuleIds: enabledRulesIds,
+//   });
+// };
 
 const removeRule = (id) => {};
 
@@ -112,16 +171,11 @@ const addRule = (url, type, redirectUrl) => {
       resourceTypes: ["main_frame", "sub_frame"],
     },
   };
-
-  console.log('adding rule:', rule, ' for mode', mode)
-
+  
   filterRules.push(rule);
 
   chrome.declarativeNetRequest.updateDynamicRules({
     removeRuleIds: getAllRulesIds(),
     addRules: filterRules
   });
-
-  console.log('updated rules:')
-  logAllRules()
 };
