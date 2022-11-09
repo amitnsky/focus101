@@ -8,33 +8,31 @@
       <form>
         <input
           type="radio"
-          id="whitelist_mode"
-          name="filtering_mode"
-          value="Whitelist Mode"
-        />
-        <label for="whitelist_mode">Whitelist Mode</label><br />
-
-        <input
-          type="radio"
           id="blacklist_mode"
           name="filtering_mode"
-          value="Blacklist Mode"
+          value="Enabled"
         />
-        <label for="blacklist_mode">Blacklist Mode</label><br />
+        <label for="blacklist_mode">Enabled</label><br />
 
         <input
           type="radio"
           id="disabled_mode"
           name="filtering_mode"
-          value="Disable Filtering"
+          value="Disabled"
         />
-        <label for="disabled_mode">Disable Filtering</label><br /><br />
+        <label for="disabled_mode">Disabled</label><br /><br />
 
         <input type="text" id="blocked_url_text" name="blocked_url" /><br /><br />
-        <button id="blocked_url_submit">Submit</button><br />
+        <button id="blocked_url_submit">Block URL</button><br />
+
       </form>
-      <div>Filtered Urls</div>
-      <ul id="filtered_urls_ul">
+      <div>Blocked Urls</div>
+      <ul id="blocked_urls_ul">
+        
+      </ul>
+    </div>
+      <div>Exceptions</div>
+      <ul id="whitelisted_urls_ul">
         
       </ul>
     </div>

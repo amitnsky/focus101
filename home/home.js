@@ -4,15 +4,15 @@ submitBtn.addEventListener('click',(ev)=>{
   let url =  document.getElementById('blocked_url_text').value;
   console.log("blocked_url: " + url)
   if(url){
-    chrome.runtime.sendMessage({action: "ADD_BLACKLIST_URL", url: url}, function(response) {
+    chrome.runtime.sendMessage({action: "BLACKLIST_URL", url: url}, function(response) {
       console.log(response);
     });
   };
 })
 
-chrome.runtime.sendMessage({action: "GET_FILTERED_URLS"}, function(response) {
+chrome.runtime.sendMessage({action: "GET_BLACKLISTED_URLS"}, function(response) {
   console.log('response',response);
-  var list = document.getElementById("filtered_urls_ul");
+  var list = document.getElementById("blocked_urls_ul");
   const createListItem = (text) => {
     let li = document.createElement('li')
     li.textContent = text;

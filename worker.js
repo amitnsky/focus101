@@ -1,34 +1,24 @@
-const WHITELIST_MODE = "whitelist_mode";
-const BLACKLIST_MODE = "blacklist_mode";
-const DISABLED_MODE = "disabled_mode";
-const whitelistedRules = [];
-const blacklistedRules = [];
-let mode = BLACKLIST_MODE;
+const ENABLED = "enabled";
+const DISABLED = "disabled";
+const filterRules = [];
+let mode = ENABLED;
 let redirectUrl = "meditopia.com";
 
 const setupContextMenus = () => {
   chrome.contextMenus.create({
-    id: BLACKLIST_MODE,
-    checked: mode === BLACKLIST_MODE,
+    id: ENABLED,
+    checked: mode === ENABLED,
     type: "radio",
     contexts: ["all"],
-    title: "Blacklist Mode",
+    title: "Enable",
   });
 
   chrome.contextMenus.create({
-    id: WHITELIST_MODE,
-    checked: mode === WHITELIST_MODE,
+    id: DISABLED,
+    checked: mode === DISABLED,
     type: "radio",
     contexts: ["all"],
-    title: "Whitelist Mode",
-  });
-
-  chrome.contextMenus.create({
-    id: DISABLED_MODE,
-    checked: mode === DISABLED_MODE,
-    type: "radio",
-    contexts: ["all"],
-    title: "Disable Filtering",
+    title: "Disable",
   });
 };
 
@@ -37,20 +27,14 @@ chrome.runtime.onInstalled.addListener(() => {
 });
 
 chrome.contextMenus.onClicked.addListener((clickData) => {
-  if (clickData.menuItemId === WHITELIST_MODE) {
-    mode = WHITELIST_MODE;
+  if (clickData.menuItemId === ENABLED) {
+    mode = ENABLED;
     chrome.declarativeNetRequest.updateDynamicRules({
       removeRuleIds: getAllRulesIds(),
-      addRules: whitelistedRules,
+      addRules: getAllRules(),
     });
-  } else if (clickData.menuItemId === BLACKLIST_MODE) {
-    mode = BLACKLIST_MODE;
-    chrome.declarativeNetRequest.updateDynamicRules({
-      removeRuleIds: getAllRulesIds(),
-      addRules: blacklistedRules,
-    });
-  } else if (clickData.menuItemId === DISABLED_MODE) {
-    mode = DISABLED_MODE;
+  } else if (clickData.menuItemId === DISABLED) {
+    mode = DISABLED;
     chrome.declarativeNetRequest.updateDynamicRules({
       removeRuleIds: getAllRulesIds(),
     });
@@ -73,17 +57,24 @@ const logAllRules = () => {
 
 logAllRules()
 
-const getAllRulesIds = () => [
-  ...whitelistedRules.map((rule) => rule.id),
-  ...blacklistedRules.map((rule) => rule.id),
-];
+const getAllRulesIds = () => filterRules.map((rule) => rule.id)
+
+const getAllRules = () => filterRules
+
+/*
+actions:
+BLACKLIST_URL,
+WHITELIST_URL,
+GET_BLACKLISTED_URLS,
+GET_WHITELISTED_URLS
+**/
 
 chrome.runtime.onMessage.addListener(
   function(request, sender, sendResponse) {
-    if (request.action === "ADD_BLACKLIST_URL"){
+    if (request.action === "BLACKLIST_URL"){
       addRule(request.url, 'block','')
       sendResponse({status: "success"});
-    }else if (request.action === "GET_FILTERED_URLS"){
+    }else if (request.action === "GET_BLACKLISTED_URLS"){
       console.log('received req')
       chrome.declarativeNetRequest.getDynamicRules((rules) => {
         console.log('sending response')
@@ -95,12 +86,12 @@ chrome.runtime.onMessage.addListener(
 );
 
 const removeAllRules = () => {
-  const enabledRules = [];
+  const enabledRulesIds = [];
   chrome.declarativeNetRequest.getDynamicRules((rules) => {
-    rules.map((rule) => enabledRules.push(rule));
+    rules.map((rule) => enabledRulesIds.push(rule.id));
   });
   chrome.declarativeNetRequest.updateDynamicRules({
-    removeRuleIds: enabledRules,
+    removeRuleIds: enabledRulesIds,
   });
 };
 
@@ -124,11 +115,11 @@ const addRule = (url, type, redirectUrl) => {
 
   console.log('adding rule:', rule, ' for mode', mode)
 
-  mode === WHITELIST_MODE ? whitelistedRules.push(rule) : blacklistedRules.push(rule);
+  filterRules.push(rule);
 
   chrome.declarativeNetRequest.updateDynamicRules({
     removeRuleIds: getAllRulesIds(),
-    addRules: mode === WHITELIST_MODE ? whitelistedRules : blacklistedRules
+    addRules: filterRules
   });
 
   console.log('updated rules:')

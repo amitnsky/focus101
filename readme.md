@@ -12,7 +12,14 @@ x it just works
 x you can simply block or unblock a url
 
 - update flows
-  - remove option of blacklist and whitelist urls, only blocking feature support now
+  - mode = ENABLED/DISABLED
+  - move text edit boxes to separate sections
+    - Block Urls
+    - Exception Urls
+  - two submit buttons - Block/Add Exception
+    - add blocking urls
+    - add exception urls
+  x remove option of blacklist and whitelist urls, only blocking feature support now + exceptions
   - save mode data in storage key 'FILTERING_MODE': "ON/OFF"
   - rename submit button to add url
   - rename filtered to "Blocked Urls"
