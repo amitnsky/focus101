@@ -1,9 +1,10 @@
 Minimum required features for launch
-- enable disable extension
-- ability to block url
-- live refresh options page
+x enable disable extension
+x ability to block url
+x live refresh options page
+x persist blocked urls
 - ability to remove a blocked url
-- persist blocked urls
+- do not show list of urls if extension is disabled
 - Good icon for extension
 
 TODOs

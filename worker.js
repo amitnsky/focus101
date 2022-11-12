@@ -60,7 +60,6 @@ const enableExtension = async () => {
 const disableExtension = async () => {
   mode = DISABLED;
   await persistRules([...filterRules])
-  console.log('persisted data',filterRules)
   chrome.declarativeNetRequest.updateDynamicRules({
     removeRuleIds: getAllRulesIds(),
   });
@@ -70,8 +69,7 @@ const disableExtension = async () => {
 
 const persistRules = async (rules) => {
   return new Promise((resolve, reject) => {
-    chrome.storage.sync.set({FILTER_RULES: rules}, function(){
-      console.log('saved data:', rules)
+    chrome.storage.sync.set({[FILTER_RULES]: rules}, function(){
       resolve()
     })
   });
@@ -81,9 +79,8 @@ const loadRules = async () => {
   return new Promise((resolve, reject) => {
     chrome.storage.sync.get(FILTER_RULES, function(response) {
       if(response && response[FILTER_RULES] && response[FILTER_RULES].length > 0 ){
-        filterRules.push([...response[FILTER_RULES]])
+        filterRules.push(...response[FILTER_RULES])
       }
-      console.log('retrived urls:', response)
     })
     resolve()
   })
@@ -128,8 +125,8 @@ GET_BLACKLISTED_URLS,
 chrome.runtime.onMessage.addListener(
   function(request, sender, sendResponse) {
     if (request.action === "BLACKLIST_URL"){
-      addRule(request.url, 'block','')
-      sendResponse({status: "success"});
+      const rule = addRule(request.url, 'block','')
+      sendResponse({status: "success", rule: rule});
     }else if (request.action === "REMOVE_BLACKLISTED_URL"){
       // console.log('received req')
       // chrome.declarativeNetRequest.getDynamicRules((rules) => {
@@ -178,4 +175,6 @@ const addRule = (url, type, redirectUrl) => {
     removeRuleIds: getAllRulesIds(),
     addRules: filterRules
   });
+
+  return rule
 };

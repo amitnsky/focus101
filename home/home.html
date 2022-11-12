@@ -1,40 +1,54 @@
 <html>
   <head>
     <script src="./home.js" type="module"></script>
+    <style>
+      ul li {
+        margin: 0 0px 0px 0;
+        /* display: list-item, flex; */
+        /* align-items: center; */
+        /* flex-direction: row; */
+        /* border: 2px solid red; */
+      }
+      p {
+        margin: 0 8px 0px 0;
+        align-content: center;
+      }
+    </style>
   </head>
   <body>
     <div style="width: 200px">
       <h1>Focus 101</h1>
-      <form>
+      <form id="options_form">
         <input
-          type="radio"
-          id="blacklist_mode"
-          name="filtering_mode"
-          value="Enabled"
-        />
-        <label for="blacklist_mode">Enabled</label><br />
+            type="radio"
+            id="blacklist_mode"
+            name="filtering_mode"
+            value="Enabled"
+          />
+          <label for="blacklist_mode">Enabled</label><br />
 
-        <input
-          type="radio"
-          id="disabled_mode"
-          name="filtering_mode"
-          value="Disabled"
-        />
-        <label for="disabled_mode">Disabled</label><br /><br />
-
-        <input type="text" id="blocked_url_text" name="blocked_url" /><br /><br />
-        <button id="blocked_url_submit">Block URL</button><br />
-
+          <input
+            type="radio"
+            id="disabled_mode"
+            name="filtering_mode"
+            value="Disabled"
+          />
+          <label for="disabled_mode">Disabled</label><br /><br />
       </form>
-      <div>Blocked Urls</div>
-      <ul id="blocked_urls_ul">
-        
-      </ul>
-    </div>
-      <div>Exceptions</div>
-      <ul id="whitelisted_urls_ul">
-        
-      </ul>
+
+      <div id="content">
+        <form id="input_form">
+          <input type="text" id="blocked_url_text" name="blocked_url" /><br /><br />
+          <button id="blocked_url_submit">Block URL</button><br />
+        </form>
+      
+        <div id="info_window">
+          <h3>Blocked Urls</h3>
+          <ul id="blockedurls_ul">
+            
+          </ul>
+        </div>
+      </div>
     </div>
   </body>
 </html>
