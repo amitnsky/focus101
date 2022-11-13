@@ -1,16 +1,30 @@
 Minimum required features for launch
-x enable disable extension
-x ability to block url
-x live refresh options page
-x persist blocked urls
-- ability to remove a blocked url
+- enable disable extension
+- ability to block url
+- live refresh options page
+- persist blocked urls
 - do not show list of urls if extension is disabled
+- option to remove a blocked url
 - Good icon for extension
 
 TODOs
-- persist on/off data in storage
-- add a save button for enable/disable in option page
-- 
+- write test cases
+- test & fix bugs
+- update icon
+- update extension name
+- publish extension
+
+Test cases
+- enable should reload blocked urls
+- disable should hide the page
+- disable should disable extension
+- disable should persist data
+- submit should add a new rule
+- submit should persist all rules
+- remove should remove rule from local cache
+- remove should remove rule from chrome blocking
+- remove should persist data
+- on load should recover previous state
 
 
 Additional features

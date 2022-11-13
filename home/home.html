@@ -20,33 +20,35 @@
       <h1>Focus 101</h1>
       <form id="options_form">
         <input
-            type="radio"
-            id="blacklist_mode"
-            name="filtering_mode"
-            value="Enabled"
-          />
-          <label for="blacklist_mode">Enabled</label><br />
+          type="radio"
+          id="enabled_radio_btn"
+          name="filtering_mode"
+          value="ENABLED"
+        />
+        <label for="enabled_radio_btn">Enabled</label><br />
 
-          <input
-            type="radio"
-            id="disabled_mode"
-            name="filtering_mode"
-            value="Disabled"
-          />
-          <label for="disabled_mode">Disabled</label><br /><br />
+        <input
+          type="radio"
+          id="disabled_radio_btn"
+          name="filtering_mode"
+          value="DISABLED"
+        />
+        <label for="disabled_radio_btn">Disabled</label><br /><br />
       </form>
 
       <div id="content">
         <form id="input_form">
-          <input type="text" id="blocked_url_text" name="blocked_url" /><br /><br />
+          <input
+            type="text"
+            id="blocked_url_text"
+            name="blocked_url"
+          /><br /><br />
           <button id="blocked_url_submit">Block URL</button><br />
         </form>
-      
+
         <div id="info_window">
           <h3>Blocked Urls</h3>
-          <ul id="blockedurls_ul">
-            
-          </ul>
+          <ul id="blocked_urls_ul"></ul>
         </div>
       </div>
     </div>
