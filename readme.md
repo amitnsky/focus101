@@ -8,6 +8,7 @@ Minimum required features for launch
 - Good icon for extension
 
 TODOs
+- remove on/off option from extensions popup
 - write test cases
 - test & fix bugs
 - update icon
