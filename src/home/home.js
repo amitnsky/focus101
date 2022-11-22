@@ -38,10 +38,16 @@ const reloadContent = (isEnabled) => {
   const content = document.getElementById("content");
   if (isEnabled) {
     reloadRadioBtns(isEnabled);
-    content.style["visibility"] = "visible";
+    getAllRules().then((allRules) => {
+      allRules.forEach((rule) => addUrlToUI(rule));
+      content.style["visibility"] = "visible";
+    });
   } else {
-    content.style["visibility"] = "hidden";
     reloadRadioBtns(isEnabled);
+    content.style["visibility"] = "hidden";
+    getAllRules().then((allRules) => {
+      allRules.forEach((rule) => removeUrlFromUI(rule.id));
+    });
   }
 };
 
@@ -120,7 +126,6 @@ const enableExtension = () => {
     chrome.declarativeNetRequest.updateDynamicRules({
       addRules: allRules,
     });
-    allRules.forEach((rule) => addUrlToUI(rule));
   });
   reloadContent(true);
 };
@@ -129,11 +134,9 @@ const disableExtension = () => {
   persistExtensionStatus(DISABLED);
   reloadContent(false);
   getAllRules().then((allRules) => {
-    persistRules(allRules);
     chrome.declarativeNetRequest.updateDynamicRules({
       removeRuleIds: getRuleIds(allRules),
     });
-    allRules.forEach((rule) => removeUrlFromUI(rule.id));
   });
 };
 
@@ -177,6 +180,7 @@ const removeRule = (id) => {
 };
 
 const addRule = (url, type, redirectUrl) => {
+  console.log(url);
   const rule = {
     id: Math.floor(Date.now() + Math.random() * 5000) % 5000,
     priority: 1,
@@ -192,13 +196,13 @@ const addRule = (url, type, redirectUrl) => {
     },
   };
 
-  chrome.declarativeNetRequest.updateDynamicRules({
-    addRules: [rule],
-  });
-
   getAllRules().then((allRules) => {
     allRules.push(rule);
     persistRules(allRules);
+
+    chrome.declarativeNetRequest.updateDynamicRules({
+      addRules: [rule],
+    });
   });
 
   return rule;
@@ -221,11 +225,12 @@ const persistRules = async (rules) => {
 const init = async () => {
   setupPage();
   const mode = await getExtensionStatus();
-  if (mode === ENABLED) {
-    enableExtension();
-  } else {
-    disableExtension();
-  }
+  reloadContent(mode === ENABLED);
+  // if (mode === ENABLED) {
+  //   enableExtension();
+  // } else {
+  //   disableExtension();
+  // }
 };
 
 await init();
