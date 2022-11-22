@@ -8,7 +8,8 @@ let mode = ENABLED;
 let redirectUrl = "meditopia.com";
 
 chrome.runtime.onInstalled.addListener(async () => {
-  await init();
+  mode = await getExtensionStatus();
+  await loadRules();
   setExtensionStatus(mode);
 });
 
@@ -18,7 +19,7 @@ chrome.action.onClicked.addListener(async (tab) => {
   });
 });
 
-const init = async () => {
+const getExtensionStatus = async () => {
   return new Promise((resolve, reject) => {
     chrome.storage.sync.get([EXTENSION_STATUS], function (mode_val) {
       if (!mode_val || !mode_val[EXTENSION_STATUS]) {
@@ -32,33 +33,29 @@ const init = async () => {
 };
 
 const setExtensionStatus = (status) => {
-  mode = status;
-  persistExtensionState(status);
-  if (status === ENABLED) {
-    enableExtension();
-  } else {
-    disableExtension();
+  if (mode !== status) {
+    mode = status;
+    persistExtensionState(status);
+    if (status === ENABLED) {
+      enableExtension();
+    } else {
+      disableExtension();
+    }
   }
 };
 
 const enableExtension = async () => {
-  await loadRules();
-  getActiveRulesIds().then((ruleIds) => {
-    chrome.declarativeNetRequest.updateDynamicRules({
-      removeRuleIds: ruleIds,
-      addRules: getAllRules(),
-    });
+  chrome.declarativeNetRequest.updateDynamicRules({
+    addRules: getAllRules(),
   });
 };
 
 const disableExtension = async () => {
-  await persistRules(filterRules);
-  getActiveRulesIds().then((ruleIds) => {
+  getActiveRules().then((rules) => {
     chrome.declarativeNetRequest.updateDynamicRules({
-      removeRuleIds: ruleIds,
+      removeRuleIds: getRuleIds(rules),
     });
   });
-  filterRules.length = 0;
 };
 
 const loadRules = async () => {
@@ -69,30 +66,23 @@ const loadRules = async () => {
         response[FILTER_RULES] &&
         response[FILTER_RULES].length > 0
       ) {
+        filterRules.length = 0;
         filterRules.push(...response[FILTER_RULES]);
       }
+      resolve(response);
     });
-    resolve();
   });
 };
 
-/** FILTERING */
-
-logAllRules();
-
 const logAllRules = () => {
   chrome.declarativeNetRequest.getDynamicRules((rules) => {
-    console.log("rules: ", rules);
+    // console.log("rules: ", rules);
   });
 };
 
 const getAllRules = () => filterRules;
 
-const getActiveRulesIds = async () => {
-  return new Promise((resolve, reject) => {
-    chrome.declarativeNetRequest.getDynamicRules((rules) => resolve(rules));
-  });
-};
+const getRuleIds = (rules) => rules.map((rule) => rule.id);
 
 /*
 actions:
@@ -103,7 +93,11 @@ GET_EXTENSION_STATUS
 SET_EXTENSION_STATUS
 **/
 
-chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
+chrome.runtime.onMessage.addListener(async function (
+  request,
+  sender,
+  sendResponse
+) {
   if (request.action === "BLACKLIST_URL") {
     const rule = addRule(request.url, "block", "");
     sendResponse({ status: "success", rule: rule });
@@ -123,15 +117,17 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     return true;
   }
 });
+
 /** UTILITY.JS */
 const removeRule = (id) => {
+  chrome.declarativeNetRequest.updateDynamicRules({
+    removeRuleIds: [id],
+  });
+
   const ind = filterRules.findIndex((rule) => rule.id === id);
   if (ind >= 0) {
     filterRules.splice(ind, 1);
   }
-  chrome.declarativeNetRequest.updateDynamicRules({
-    removeRuleIds: [id],
-  });
   persistRules(filterRules);
 };
 
@@ -151,21 +147,22 @@ const addRule = (url, type, redirectUrl) => {
     },
   };
 
-  filterRules.push(rule);
-
-  getActiveRulesIds().then((rulesIds) => {
-    chrome.declarativeNetRequest.updateDynamicRules({
-      removeRuleIds: rulesIds,
-      addRules: filterRules,
-    });
+  chrome.declarativeNetRequest.updateDynamicRules({
+    addRules: [rule],
   });
 
+  filterRules.push(rule);
   persistRules(filterRules);
 
   return rule;
 };
 
-/** STORAGE JS */
+const getActiveRules = async () => {
+  return new Promise((resolve, reject) => {
+    chrome.declarativeNetRequest.getDynamicRules((rules) => resolve(rules));
+  });
+};
+
 const persistRules = async (rules) => {
   return new Promise((resolve, reject) => {
     chrome.storage.sync.set({ [FILTER_RULES]: rules }, function () {
@@ -177,3 +174,31 @@ const persistRules = async (rules) => {
 const persistExtensionState = (status) => {
   chrome.storage.sync.set({ [EXTENSION_STATUS]: status });
 };
+
+// filter rules is a cache layer
+// when interacting with cache - we don't interact directly with original db
+
+const actions = {
+  addRule,
+  removeRule,
+  getActiveRules,
+
+  getAllRules,
+  persistRules,
+
+  enableExtension,
+  disableExtension,
+};
+
+/**
+ *
+ * operations
+ *
+ * add a rule
+ * delete a rule
+ * get all rules
+ *
+ * enable extension -
+ * disable extension -
+ *
+ */

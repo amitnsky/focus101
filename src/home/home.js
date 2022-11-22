@@ -3,6 +3,8 @@ const FILTER_RULES = "FILTER_RULES";
 const ENABLED = "ENABLED";
 const DISABLED = "DISABLED";
 
+let extensionStatus = DISABLED;
+
 const reloadContent = (isEnabled) => {
   const content = document.getElementById("content");
   setupRadioButtons(isEnabled);
@@ -31,30 +33,42 @@ const reloadContent = (isEnabled) => {
       }
     });
   } else {
+    chrome.runtime.sendMessage(
+      { action: "GET_BLACKLISTED_URLS" },
+      function (response) {
+        var list = document.getElementById("blocked_urls_ul");
+        response.rules?.forEach((rule) => {
+          var li = document.getElementById(rule.id);
+          list.removeChild(li);
+        });
+      }
+    );
     content.style["visibility"] = "hidden";
   }
 };
 
-const setExtensionStatus = (status) => {
-  chrome.storage.sync.set({ [EXTENSION_STATUS]: status });
-};
-
 const disableExtension = () => {
-  console.log("disabled");
-  reloadContent(false);
-  chrome.runtime.sendMessage({
-    action: "SET_EXTENSION_STATUS",
-    status: DISABLED,
-  });
+  if (extensionStatus !== DISABLED) {
+    extensionStatus = DISABLED;
+    // console.log("disabled");
+    reloadContent(false);
+    chrome.runtime.sendMessage({
+      action: "SET_EXTENSION_STATUS",
+      status: DISABLED,
+    });
+  }
 };
 
 const enableExtension = () => {
-  console.log("enabled");
-  reloadContent(true);
-  chrome.runtime.sendMessage({
-    action: "SET_EXTENSION_STATUS",
-    status: ENABLED,
-  });
+  if (extensionStatus !== ENABLED) {
+    extensionStatus = ENABLED;
+    // console.log("enabled");
+    reloadContent(true);
+    chrome.runtime.sendMessage({
+      action: "SET_EXTENSION_STATUS",
+      status: ENABLED,
+    });
+  }
 };
 
 const setupRadioButtons = (isEnabled) => {
@@ -120,7 +134,8 @@ const addUrl = (rule) => {
 chrome.runtime.sendMessage(
   { action: "GET_EXTENSION_STATUS" },
   function (response) {
-    console.log("extension status:", response.status);
-    reloadContent(response.status == ENABLED);
+    // console.log("extension status:", response.status);
+    extensionStatus = response.status;
+    reloadContent(response.status === ENABLED);
   }
 );

@@ -14,6 +14,8 @@ TODOs
 - update icon
 - update extension name
 - publish extension
+- integrate react js
+- create it a great extension
 
 Test cases
 - enable should reload blocked urls
