@@ -11,6 +11,6 @@
     "service_worker": "worker.js",
     "type": "module"
   },
-  "permissions": ["declarativeNetRequest", "storage"],
+  "permissions": ["declarativeNetRequest", "storage", "browsingData"],
   "host_permissions": ["<all_urls>"]
 }

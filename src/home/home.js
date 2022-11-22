@@ -196,9 +196,40 @@ const addRule = (url, type, redirectUrl) => {
     },
   };
 
+  const addhttp = (url) => {
+    if (!/^(?:f|ht)tps?\:\/\//.test(url)) {
+      url = "http://" + url;
+    }
+    return url;
+  };
+
+  const urlUtility = {
+    addhttp,
+  };
   getAllRules().then((allRules) => {
     allRules.push(rule);
     persistRules(allRules);
+
+    // urlUtility.addwww(url);
+    // urlUtility.addhttp(url);
+
+    // chrome.browsingData.remove(
+    //   {
+    //     origins: [url],
+    //   },
+    //   {
+    //     cacheStorage: true,
+    //     cookies: true,
+    //     // "fileSystems": true,
+    //     // "indexedDB": true,
+    //     // "localStorage": true,
+    //     serviceWorkers: true,
+    //     // "webSQL": true
+    //   },
+    //   () => {
+    //     console.log("cleared data");
+    //   }
+    // );
 
     chrome.declarativeNetRequest.updateDynamicRules({
       addRules: [rule],
@@ -226,11 +257,6 @@ const init = async () => {
   setupPage();
   const mode = await getExtensionStatus();
   reloadContent(mode === ENABLED);
-  // if (mode === ENABLED) {
-  //   enableExtension();
-  // } else {
-  //   disableExtension();
-  // }
 };
 
 await init();
