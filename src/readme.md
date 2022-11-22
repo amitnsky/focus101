@@ -36,3 +36,8 @@ Additional features
 - optionally redirect to a new page (configurable)
 - scheduling
 - do not add duplicate urls
+
+
+source of truth to list active rules should be 
+> always declarative net requests
+

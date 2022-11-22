@@ -3,84 +3,51 @@ const FILTER_RULES = "FILTER_RULES";
 const ENABLED = "ENABLED";
 const DISABLED = "DISABLED";
 
-let extensionStatus = DISABLED;
+const getEnabledRadioBtn = () => {
+  return document.getElementById("enabled_radio_btn");
+};
+
+const getDisabledRadioBtn = () => {
+  return document.getElementById("disabled_radio_btn");
+};
+
+const setupPage = () => {
+  var submitBtn = document.getElementById("blocked_url_submit");
+  submitBtn.addEventListener("click", (ev) => {
+    ev.preventDefault();
+    let input = document.getElementById("blocked_url_text");
+    let url = input.value;
+    if (url) {
+      const rule = addRule(url, "block", "");
+      addUrlToUI(rule);
+      input.value = "";
+    }
+  });
+  setupRadioButtons();
+};
+
+const setupRadioButtons = () => {
+  let enabledRadioBtn = getEnabledRadioBtn();
+  let disabledRadioBtn = getDisabledRadioBtn();
+  enabledRadioBtn.addEventListener("click", enableExtension);
+  disabledRadioBtn.addEventListener("click", disableExtension);
+};
 
 const reloadContent = (isEnabled) => {
+  console.log("isEnabled: " + isEnabled);
   const content = document.getElementById("content");
-  setupRadioButtons(isEnabled);
   if (isEnabled) {
+    reloadRadioBtns(isEnabled);
     content.style["visibility"] = "visible";
-
-    chrome.runtime.sendMessage(
-      { action: "GET_BLACKLISTED_URLS" },
-      function (response) {
-        response.rules?.forEach((rule) => addUrl(rule));
-      }
-    );
-    var submitBtn = document.getElementById("blocked_url_submit");
-    submitBtn.addEventListener("click", (ev) => {
-      ev.preventDefault();
-      let input = document.getElementById("blocked_url_text");
-      let url = input.value;
-      if (url) {
-        chrome.runtime.sendMessage(
-          { action: "BLACKLIST_URL", url: url },
-          function (response) {
-            addUrl(response.rule);
-          }
-        );
-        input.value = "";
-      }
-    });
   } else {
-    chrome.runtime.sendMessage(
-      { action: "GET_BLACKLISTED_URLS" },
-      function (response) {
-        var list = document.getElementById("blocked_urls_ul");
-        response.rules?.forEach((rule) => {
-          var li = document.getElementById(rule.id);
-          list.removeChild(li);
-        });
-      }
-    );
     content.style["visibility"] = "hidden";
+    reloadRadioBtns(isEnabled);
   }
 };
 
-const disableExtension = () => {
-  if (extensionStatus !== DISABLED) {
-    extensionStatus = DISABLED;
-    // console.log("disabled");
-    reloadContent(false);
-    chrome.runtime.sendMessage({
-      action: "SET_EXTENSION_STATUS",
-      status: DISABLED,
-    });
-  }
-};
-
-const enableExtension = () => {
-  if (extensionStatus !== ENABLED) {
-    extensionStatus = ENABLED;
-    // console.log("enabled");
-    reloadContent(true);
-    chrome.runtime.sendMessage({
-      action: "SET_EXTENSION_STATUS",
-      status: ENABLED,
-    });
-  }
-};
-
-const setupRadioButtons = (isEnabled) => {
-  let enabledRadioBtn = document.getElementById("enabled_radio_btn");
-  let disabledRadioBtn = document.getElementById("disabled_radio_btn");
-
-  enabledRadioBtn.removeEventListener("click", enableExtension);
-  enabledRadioBtn.addEventListener("click", enableExtension);
-
-  disabledRadioBtn.removeEventListener("click", disableExtension);
-  disabledRadioBtn.addEventListener("click", disableExtension);
-
+const reloadRadioBtns = (isEnabled) => {
+  let enabledRadioBtn = getEnabledRadioBtn();
+  let disabledRadioBtn = getDisabledRadioBtn();
   if (isEnabled) {
     enabledRadioBtn.checked = true;
     disabledRadioBtn.checked = false;
@@ -90,18 +57,13 @@ const setupRadioButtons = (isEnabled) => {
   }
 };
 
-const removeUrl = (id) => {
+const removeUrlFromUI = (id) => {
   var list = document.getElementById("blocked_urls_ul");
   var li = document.getElementById(id);
-  chrome.runtime.sendMessage(
-    { action: "REMOVE_BLACKLISTED_URL", id: id },
-    function (response) {
-      list.removeChild(li);
-    }
-  );
+  list.removeChild(li);
 };
 
-const addUrl = (rule) => {
+const addUrlToUI = (rule) => {
   var list = document.getElementById("blocked_urls_ul");
   const createListItem = (text) => {
     let p = document.createElement("p");
@@ -111,7 +73,10 @@ const addUrl = (rule) => {
     icon.src = "../images/delete_icon.png";
     icon.width = "8";
     icon.height = "8";
-    icon.onclick = () => removeUrl(rule.id);
+    icon.onclick = () => {
+      removeUrlFromUI(rule.id);
+      removeRule(rule.id);
+    };
 
     let div = document.createElement("span");
     div.style["display"] = "flex";
@@ -131,11 +96,149 @@ const addUrl = (rule) => {
   list.appendChild(li);
 };
 
-chrome.runtime.sendMessage(
-  { action: "GET_EXTENSION_STATUS" },
-  function (response) {
-    // console.log("extension status:", response.status);
-    extensionStatus = response.status;
-    reloadContent(response.status === ENABLED);
+const getExtensionStatus = async () => {
+  return new Promise((resolve, reject) => {
+    chrome.storage.sync.get([EXTENSION_STATUS], function (mode_val) {
+      let status = DISABLED;
+      if (!mode_val || !mode_val[EXTENSION_STATUS]) {
+        status = DISABLED;
+      } else {
+        status = mode_val[EXTENSION_STATUS];
+      }
+      resolve(status);
+    });
+  });
+};
+
+const persistExtensionStatus = (status) => {
+  chrome.storage.sync.set({ [EXTENSION_STATUS]: status });
+};
+
+const enableExtension = () => {
+  persistExtensionStatus(ENABLED);
+  getAllRules().then((allRules) => {
+    chrome.declarativeNetRequest.updateDynamicRules({
+      addRules: allRules,
+    });
+    allRules.forEach((rule) => addUrlToUI(rule));
+  });
+  reloadContent(true);
+};
+
+const disableExtension = () => {
+  persistExtensionStatus(DISABLED);
+  reloadContent(false);
+  getAllRules().then((allRules) => {
+    persistRules(allRules);
+    chrome.declarativeNetRequest.updateDynamicRules({
+      removeRuleIds: getRuleIds(allRules),
+    });
+    allRules.forEach((rule) => removeUrlFromUI(rule.id));
+  });
+};
+
+const getAllRules = () => {
+  return new Promise((resolve, reject) => {
+    chrome.storage.sync.get(FILTER_RULES, function (response) {
+      const filterRules = [];
+      if (
+        response &&
+        response[FILTER_RULES] &&
+        response[FILTER_RULES].length > 0
+      ) {
+        filterRules.length = 0;
+        filterRules.push(...response[FILTER_RULES]);
+      }
+      getActiveRules().then((rules) => {
+        rules.forEach((rule) => {
+          if (filterRules.findIndex((fr) => fr.id === rule.id) < 0) {
+            filterRules.push(rule);
+          }
+        });
+        resolve(filterRules);
+      });
+    });
+  });
+};
+
+const getRuleIds = (rules) => rules.map((rule) => rule.id);
+
+const removeRule = (id) => {
+  chrome.declarativeNetRequest.updateDynamicRules({
+    removeRuleIds: [id],
+  });
+  getAllRules().then((allRules) => {
+    const ind = allRules.findIndex((fr) => fr.id === id);
+    if (ind >= 0) {
+      allRules.splice(ind, 1);
+      persistRules(allRules);
+    }
+  });
+};
+
+const addRule = (url, type, redirectUrl) => {
+  const rule = {
+    id: Math.floor(Date.now() + Math.random() * 5000) % 5000,
+    priority: 1,
+    action: {
+      type: type,
+      redirect: {
+        url: redirectUrl,
+      },
+    },
+    condition: {
+      urlFilter: url,
+      resourceTypes: ["main_frame", "sub_frame"],
+    },
+  };
+
+  chrome.declarativeNetRequest.updateDynamicRules({
+    addRules: [rule],
+  });
+
+  getAllRules().then((allRules) => {
+    allRules.push(rule);
+    persistRules(allRules);
+  });
+
+  return rule;
+};
+
+const getActiveRules = async () => {
+  return new Promise((resolve, reject) => {
+    chrome.declarativeNetRequest.getDynamicRules((rules) => resolve(rules));
+  });
+};
+
+const persistRules = async (rules) => {
+  return new Promise((resolve, reject) => {
+    chrome.storage.sync.set({ [FILTER_RULES]: rules }, function () {
+      resolve();
+    });
+  });
+};
+
+const init = async () => {
+  setupPage();
+  const mode = await getExtensionStatus();
+  if (mode === ENABLED) {
+    enableExtension();
+  } else {
+    disableExtension();
   }
-);
+};
+
+await init();
+
+/**
+ *
+ * operations
+ *
+ * add a rule
+ * delete a rule
+ * get all rules
+ *
+ * enable extension -
+ * disable extension -
+ *
+ */
