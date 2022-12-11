@@ -18,7 +18,7 @@ const setupPage = () => {
     let input = document.getElementById("blocked_url_text");
     let url = input.value;
     if (url) {
-      const rule = addRule(url, "block", "");
+      const rule = addRule(url);
       addUrlToUI(rule);
       input.value = "";
     }
@@ -34,19 +34,18 @@ const setupRadioButtons = () => {
 };
 
 const reloadContent = (isEnabled) => {
-  console.log("isEnabled: " + isEnabled);
+  // console.log("isEnabled: " + isEnabled);
   const content = document.getElementById("content");
+  reloadRadioBtns(isEnabled);
   if (isEnabled) {
-    reloadRadioBtns(isEnabled);
     getAllRules().then((allRules) => {
       allRules.forEach((rule) => addUrlToUI(rule));
       content.style["visibility"] = "visible";
     });
   } else {
-    reloadRadioBtns(isEnabled);
     content.style["visibility"] = "hidden";
     getAllRules().then((allRules) => {
-      allRules.forEach((rule) => removeUrlFromUI(rule.id));
+      allRules.forEach((rule) => removeUrlFromUI(rule.dynamicRule.id));
     });
   }
 };
@@ -80,8 +79,8 @@ const addUrlToUI = (rule) => {
     icon.width = "8";
     icon.height = "8";
     icon.onclick = () => {
-      removeUrlFromUI(rule.id);
-      removeRule(rule.id);
+      removeUrlFromUI(rule.dynamicRule.id);
+      removeRule(rule.dynamicRule.id);
     };
 
     let div = document.createElement("span");
@@ -92,13 +91,12 @@ const addUrlToUI = (rule) => {
     div.appendChild(icon);
 
     let li = document.createElement("li");
-    li.id = rule.id;
+    li.id = rule.dynamicRule.id;
     li.appendChild(div);
 
     return li;
   };
-  const url = rule.condition.urlFilter;
-  var li = createListItem(url);
+  var li = createListItem(rule.url);
   list.appendChild(li);
 };
 
@@ -124,7 +122,7 @@ const enableExtension = () => {
   persistExtensionStatus(ENABLED);
   getAllRules().then((allRules) => {
     chrome.declarativeNetRequest.updateDynamicRules({
-      addRules: allRules,
+      addRules: allRules.map((rule) => rule.dynamicRule),
     });
   });
   reloadContent(true);
@@ -152,26 +150,27 @@ const getAllRules = () => {
         filterRules.length = 0;
         filterRules.push(...response[FILTER_RULES]);
       }
-      getActiveRules().then((rules) => {
-        rules.forEach((rule) => {
-          if (filterRules.findIndex((fr) => fr.id === rule.id) < 0) {
-            filterRules.push(rule);
-          }
-        });
-        resolve(filterRules);
-      });
+      resolve(filterRules);
+      // getActiveRules().then((rules) => {
+      //   rules.forEach((rule) => {
+      //     if (filterRules.findIndex((fr) => fr.id === rule.id) < 0) {
+      //       filterRules.push(rule);
+      //     }
+      //   });
+      //   resolve(filterRules);
+      // });
     });
   });
 };
 
-const getRuleIds = (rules) => rules.map((rule) => rule.id);
+const getRuleIds = (rules) => rules.map((rule) => rule.dynamicRule.id);
 
 const removeRule = (id) => {
   chrome.declarativeNetRequest.updateDynamicRules({
     removeRuleIds: [id],
   });
   getAllRules().then((allRules) => {
-    const ind = allRules.findIndex((fr) => fr.id === id);
+    const ind = allRules.findIndex((fr) => fr?.dynamicRule?.id === id);
     if (ind >= 0) {
       allRules.splice(ind, 1);
       persistRules(allRules);
@@ -179,71 +178,46 @@ const removeRule = (id) => {
   });
 };
 
-const addRule = (url, type, redirectUrl) => {
-  console.log(url);
-  const rule = {
+const createRule = (url) => {
+  const urlReg = /(?:https?:\/\/)?(?:www\.)?(.+)/gm;
+  const matchRes = urlReg.exec(url);
+  const domain = matchRes[1].replace(".", "\\.");
+  const urlFilterPattern = `https?:\\/\\/(www\\.)?${domain}`;
+  const dynamicRule = {
     id: Math.floor(Date.now() + Math.random() * 5000) % 5000,
     priority: 1,
     action: {
-      type: type,
+      type: "redirect",
       redirect: {
-        url: redirectUrl,
+        extensionPath: "/blocked/blocked.html",
       },
     },
     condition: {
-      urlFilter: url,
-      resourceTypes: ["main_frame", "sub_frame"],
+      isUrlFilterCaseSensitive: false,
+      regexFilter: urlFilterPattern,
+      resourceTypes: ["main_frame"],
     },
   };
+  return { url: url, dynamicRule: dynamicRule };
+};
 
-  const addhttp = (url) => {
-    if (!/^(?:f|ht)tps?\:\/\//.test(url)) {
-      url = "http://" + url;
-    }
-    return url;
-  };
-
-  const urlUtility = {
-    addhttp,
-  };
+const addRule = (url) => {
+  const rule = createRule(url);
   getAllRules().then((allRules) => {
     allRules.push(rule);
     persistRules(allRules);
-
-    // urlUtility.addwww(url);
-    // urlUtility.addhttp(url);
-
-    // chrome.browsingData.remove(
-    //   {
-    //     origins: [url],
-    //   },
-    //   {
-    //     cacheStorage: true,
-    //     cookies: true,
-    //     // "fileSystems": true,
-    //     // "indexedDB": true,
-    //     // "localStorage": true,
-    //     serviceWorkers: true,
-    //     // "webSQL": true
-    //   },
-    //   () => {
-    //     console.log("cleared data");
-    //   }
-    // );
-
     chrome.declarativeNetRequest.updateDynamicRules({
-      addRules: [rule],
+      addRules: [rule.dynamicRule],
     });
   });
-
   return rule;
 };
 
-const getActiveRules = async () => {
-  return new Promise((resolve, reject) => {
-    chrome.declarativeNetRequest.getDynamicRules((rules) => resolve(rules));
-  });
-};
+// const getActiveRules = async () => {
+//   return new Promise((resolve, reject) => {
+//     chrome.declarativeNetRequest.getDynamicRules((rules) => resolve(rules));
+//   });
+// };
 
 const persistRules = async (rules) => {
   return new Promise((resolve, reject) => {

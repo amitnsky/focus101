@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Focus 101",
   "description": "Simple extension to block sites and keep you focused!",
-  "version": "1.0.1",
+  "version": "1.0.3",
   "action": {
     "default_icon": "images/focus_icon.png"
   },
@@ -11,6 +11,6 @@
     "service_worker": "worker.js",
     "type": "module"
   },
-  "permissions": ["declarativeNetRequest", "storage", "browsingData"],
+  "permissions": ["declarativeNetRequest", "storage"],
   "host_permissions": ["<all_urls>"]
 }
