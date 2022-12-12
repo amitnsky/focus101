@@ -8,10 +8,7 @@ Minimum required features for launch
 - [X] Good icon for extension
 
 TODOs
-- [ ] add functionality to block urls based on regex
-- [ ] store this url in local + id etc
-- [ ] first load page, removing rule, adding a new rule
-- [ ] show blocked urls only from local storage
+- [ ] pretty blocked page with random 5 images and 5 texts
 - [ ] add text placeholder in submit field - Type url, e.g. htttps://abc.nyz.com
 - [ ] change default blocking priority to 3
 - [ ] figure out how to block all sites - // https?:\\/\\/(www\\.)?google\\.com
