@@ -151,14 +151,6 @@ const getAllRules = () => {
         filterRules.push(...response[FILTER_RULES]);
       }
       resolve(filterRules);
-      // getActiveRules().then((rules) => {
-      //   rules.forEach((rule) => {
-      //     if (filterRules.findIndex((fr) => fr.id === rule.id) < 0) {
-      //       filterRules.push(rule);
-      //     }
-      //   });
-      //   resolve(filterRules);
-      // });
     });
   });
 };
@@ -213,12 +205,6 @@ const addRule = (url) => {
   return rule;
 };
 
-// const getActiveRules = async () => {
-//   return new Promise((resolve, reject) => {
-//     chrome.declarativeNetRequest.getDynamicRules((rules) => resolve(rules));
-//   });
-// };
-
 const persistRules = async (rules) => {
   return new Promise((resolve, reject) => {
     chrome.storage.sync.set({ [FILTER_RULES]: rules }, function () {
@@ -234,16 +220,3 @@ const init = async () => {
 };
 
 await init();
-
-/**
- *
- * operations
- *
- * add a rule
- * delete a rule
- * get all rules
- *
- * enable extension -
- * disable extension -
- *
- */

@@ -8,7 +8,8 @@ Minimum required features for launch
 - [X] Good icon for extension
 
 TODOs
-- [ ] pretty blocked page with random 5 images and 5 texts
+- [ ] pretty blocked page with random 10 images 
+- [ ] make image responsive
 - [ ] add text placeholder in submit field - Type url, e.g. htttps://abc.nyz.com
 - [ ] change default blocking priority to 3
 - [ ] figure out how to block all sites - // https?:\\/\\/(www\\.)?google\\.com
