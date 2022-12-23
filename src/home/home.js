@@ -177,7 +177,7 @@ const createRule = (url) => {
   const urlFilterPattern = `https?:\\/\\/(www\\.)?${domain}`;
   const dynamicRule = {
     id: Math.floor(Date.now() + Math.random() * 5000) % 5000,
-    priority: 1,
+    priority: 3,
     action: {
       type: "redirect",
       redirect: {

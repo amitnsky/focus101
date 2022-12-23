@@ -1,18 +1,12 @@
-Minimum required features for launch
-- [X] enable disable extension
-- [X] ability to block url
-- [X] live refresh options page
-- [X] persist blocked urls
-- [X] do not show list of urls if extension is disabled
-- [X] option to remove a blocked url
-- [X] Good icon for extension
-
 TODOs
-- [ ] pretty blocked page with random 10 images 
-- [ ] make image responsive
+- [ ] add enable/disable options for each rule
+- [ ] block any custom url (it will help in unblocking any custom URL)
+  - [ ] youtube.com/shorts
+  - [ ] youtube.com/shorts/ - note that first and this are equivalent
+  - [ ] youtube.com/shorts/123
+  - [ ] optional key - block immediately (close all tabs which match this url)
+    - [ ] refresh each tab matching this rule
 - [ ] add text placeholder in submit field - Type url, e.g. htttps://abc.nyz.com
-- [ ] change default blocking priority to 3
-- [ ] figure out how to block all sites - // https?:\\/\\/(www\\.)?google\\.com
 - [ ] add exceptions - e.g. some bookmarked urls
 - [ ] integrate react js
 - [ ] create it a great extension
