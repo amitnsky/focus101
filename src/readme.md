@@ -1,13 +1,13 @@
 TODOs
+- [ ] add text placeholder in submit field - Type url, e.g. htttps://abc.nyz.com
 - [ ] add enable/disable options for each rule
-- [ ] block any custom url (it will help in unblocking any custom URL)
+- [ ] unblock any custom url (it will help in unblocking any custom URL)
   - [ ] youtube.com/shorts
   - [ ] youtube.com/shorts/ - note that first and this are equivalent
   - [ ] youtube.com/shorts/123
   - [ ] optional key - block immediately (close all tabs which match this url)
-    - [ ] refresh each tab matching this rule
-- [ ] add text placeholder in submit field - Type url, e.g. htttps://abc.nyz.com
 - [ ] add exceptions - e.g. some bookmarked urls
+- [ ] poc for any other tool which can simplify styling with built in widgets something, somehow we need to get rid of manually styling components
 - [ ] integrate react js
 - [ ] create it a great extension
 

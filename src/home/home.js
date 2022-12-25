@@ -2,6 +2,17 @@ const EXTENSION_STATUS = "EXTENSION_STATUS";
 const FILTER_RULES = "FILTER_RULES";
 const ENABLED = "ENABLED";
 const DISABLED = "DISABLED";
+const DEBUG_MODE = "ON";
+
+// INTERCEPT ALL CONSOLE LOGS
+{
+  if (DEBUG_MODE == "ON") {
+    const log = console.log.bind(console);
+    console.log = (...args) => {
+      log(...args);
+    };
+  }
+}
 
 const getEnabledRadioBtn = () => {
   return document.getElementById("enabled_radio_btn");
@@ -34,7 +45,7 @@ const setupRadioButtons = () => {
 };
 
 const reloadContent = (isEnabled) => {
-  // console.log("isEnabled: " + isEnabled);
+  console.log("isEnabled: " + isEnabled);
   const content = document.getElementById("content");
   reloadRadioBtns(isEnabled);
   if (isEnabled) {
@@ -109,7 +120,11 @@ const getExtensionStatus = async () => {
       } else {
         status = mode_val[EXTENSION_STATUS];
       }
-      resolve(status);
+      if (DEBUG_MODE == "ON") {
+        resolve(ENABLED);
+      } else {
+        resolve(status);
+      }
     });
   });
 };
@@ -140,7 +155,7 @@ const disableExtension = () => {
 
 const getAllRules = () => {
   return new Promise((resolve, reject) => {
-    chrome.storage.sync.get(FILTER_RULES, function (response) {
+    chrome.storage.sync.get(FILTER_RULES, async function (response) {
       const filterRules = [];
       if (
         response &&
@@ -149,6 +164,21 @@ const getAllRules = () => {
       ) {
         filterRules.length = 0;
         filterRules.push(...response[FILTER_RULES]);
+      }
+      // SHOW ACTIVE RULES AS WELL IN DEBUG MODE
+      if (DEBUG_MODE == "ON") {
+        const dynamicRules =
+          await chrome.declarativeNetRequest.getDynamicRules();
+        console.log("dynamic rules", dynamicRules);
+        console.log("filter rules", filterRules);
+        dynamicRules.forEach((rule) => {
+          console.log("drule", rule);
+          if (filterRules.findIndex((fr) => fr.dynamicRule.id !== rule.id) < 0)
+            filterRules.push({
+              dynamicRule: rule,
+              url: rule.condition.regexFilter,
+            });
+        });
       }
       resolve(filterRules);
     });
