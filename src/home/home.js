@@ -81,7 +81,17 @@ const removeUrlFromUI = (id) => {
 
 const addUrlToUI = (rule) => {
   var list = document.getElementById("blocked_urls_ul");
+  const ruleId = rule.dynamicRule.id;
   const createListItem = (text) => {
+    let cbInput = document.createElement("input");
+    cbInput.type = "checkbox";
+    cbInput.onclick = (ev) => {
+      console.log(ruleId);
+      if (ev.target.checked) {
+      } else {
+      }
+    };
+
     let p = document.createElement("p");
     p.textContent = text;
 
@@ -90,19 +100,20 @@ const addUrlToUI = (rule) => {
     icon.width = "8";
     icon.height = "8";
     icon.onclick = () => {
-      removeUrlFromUI(rule.dynamicRule.id);
-      removeRule(rule.dynamicRule.id);
+      removeUrlFromUI(ruleId);
+      removeRule(ruleId);
     };
 
     let div = document.createElement("span");
     div.style["display"] = "flex";
     div.style["align-items"] = "baseline";
 
+    div.appendChild(cbInput);
     div.appendChild(p);
     div.appendChild(icon);
 
     let li = document.createElement("li");
-    li.id = rule.dynamicRule.id;
+    li.id = ruleId;
     li.appendChild(div);
 
     return li;

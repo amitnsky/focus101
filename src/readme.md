@@ -1,5 +1,4 @@
 TODOs
-- [ ] add text placeholder in submit field - Type url, e.g. htttps://abc.nyz.com
 - [ ] add enable/disable options for each rule
 - [ ] unblock any custom url (it will help in unblocking any custom URL)
   - [ ] youtube.com/shorts
