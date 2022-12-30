@@ -5,6 +5,7 @@ TODOs
   - [ ] youtube.com/shorts/ - note that first and this are equivalent
   - [ ] youtube.com/shorts/123
   - [ ] optional key - block immediately (close all tabs which match this url)
+  - [ ] https://mui.com/
 - [ ] add exceptions - e.g. some bookmarked urls
 - [ ] poc for any other tool which can simplify styling with built in widgets something, somehow we need to get rid of manually styling components
 - [ ] integrate react js

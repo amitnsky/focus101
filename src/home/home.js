@@ -50,6 +50,7 @@ const reloadContent = (isEnabled) => {
   reloadRadioBtns(isEnabled);
   if (isEnabled) {
     getAllRules().then((allRules) => {
+      console.log("reloadContent");
       allRules.forEach((rule) => addUrlToUI(rule));
       content.style["visibility"] = "visible";
     });
@@ -147,6 +148,7 @@ const persistExtensionStatus = (status) => {
 const enableExtension = () => {
   persistExtensionStatus(ENABLED);
   getAllRules().then((allRules) => {
+    console.log("enableExtension");
     chrome.declarativeNetRequest.updateDynamicRules({
       addRules: allRules.map((rule) => rule.dynamicRule),
     });
@@ -183,12 +185,15 @@ const getAllRules = () => {
         console.log("dynamic rules", dynamicRules);
         console.log("filter rules", filterRules);
         dynamicRules.forEach((rule) => {
-          console.log("drule", rule);
-          if (filterRules.findIndex((fr) => fr.dynamicRule.id !== rule.id) < 0)
+          if (
+            filterRules.findIndex((fr) => fr.dynamicRule.id === rule.id) < 0
+          ) {
+            console.log("drule", rule);
             filterRules.push({
               dynamicRule: rule,
               url: rule.condition.regexFilter,
             });
+          }
         });
       }
       resolve(filterRules);
@@ -211,7 +216,7 @@ const removeRule = (id) => {
   });
 };
 
-const createRule = (url) => {
+const createRule = (url, active = false) => {
   const urlReg = /(?:https?:\/\/)?(?:www\.)?(.+)/gm;
   const matchRes = urlReg.exec(url);
   const domain = matchRes[1].replace(".", "\\.");
@@ -231,11 +236,11 @@ const createRule = (url) => {
       resourceTypes: ["main_frame"],
     },
   };
-  return { url: url, dynamicRule: dynamicRule };
+  return { url: url, dynamicRule: dynamicRule, active: active };
 };
 
 const addRule = (url) => {
-  const rule = createRule(url);
+  const rule = createRule(url, true);
   getAllRules().then((allRules) => {
     allRules.push(rule);
     persistRules(allRules);
