@@ -1,59 +1,8 @@
 <html>
   <head>
-    <script src="./home.js" type="module"></script>
-    <style>
-      ul li {
-        margin: 0 0px 0px 0;
-        /* display: list-item, flex; */
-        /* align-items: center; */
-        /* flex-direction: row; */
-        /* border: 2px solid red; */
-      }
-      p {
-        margin: 0 8px 0px 0;
-        align-content: center;
-      }
-    </style>
+    <script src="./main.js" type="module"></script>
   </head>
   <body>
-    <div style="width: 600px">
-      <h1>Focus 101</h1>
-      <p>Note: Clear cookies for sites if extension does not work!</p>
-      <br />
-      <form id="options_form">
-        <input
-          type="radio"
-          id="enabled_radio_btn"
-          name="filtering_mode"
-          value="ENABLED"
-        />
-        <label for="enabled_radio_btn">Enabled</label><br />
-
-        <input
-          type="radio"
-          id="disabled_radio_btn"
-          name="filtering_mode"
-          value="DISABLED"
-        />
-        <label for="disabled_radio_btn">Disabled</label><br /><br />
-      </form>
-
-      <div id="content">
-        <form id="input_form">
-          <input
-            type="text"
-            id="blocked_url_text"
-            name="blocked_url"
-            placeholder="Enter url: e.g. abc.com"
-          /><br /><br />
-          <button id="blocked_url_submit">Block URL</button><br />
-        </form>
-
-        <div id="info_window">
-          <h3>Blocked Urls</h3>
-          <ul id="blocked_urls_ul"></ul>
-        </div>
-      </div>
-    </div>
+    <div id="root"></div>
   </body>
 </html>

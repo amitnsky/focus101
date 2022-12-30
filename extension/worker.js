@@ -10,7 +10,7 @@ chrome.runtime.onInstalled.addListener(async () => {
 
 chrome.action.onClicked.addListener(async (tab) => {
   chrome.tabs.create({
-    url: "./home/index.html",
+    url: "./home/home.html",
   });
 });
 
